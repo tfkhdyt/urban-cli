@@ -4,6 +4,7 @@ go 1.22.4
 
 require (
 	github.com/gocolly/colly/v2 v2.1.0
+	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/term v0.21.0
 )

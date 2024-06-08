@@ -5,6 +5,7 @@ import (
 	"os"
 	"slices"
 
+	"github.com/mitchellh/go-wordwrap"
 	"golang.org/x/term"
 )
 
@@ -24,8 +25,8 @@ func PrintResult(result []Result, reverse bool) {
 			),
 			r.Contributor,
 		)
-		fmt.Printf("%s\n\n", r.Meaning)
-		fmt.Printf("%s\n\n", r.Example)
+		fmt.Println(wordwrap.WrapString(fmt.Sprintf("%s\n", r.Meaning), uint(getTermSize())))
+		fmt.Println(wordwrap.WrapString(fmt.Sprintf("%s\n", r.Example), uint(getTermSize())))
 	}
 	fmt.Println(getHorizontalLine(getTermSize()))
 }
