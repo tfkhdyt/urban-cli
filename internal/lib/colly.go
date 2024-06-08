@@ -13,6 +13,7 @@ type Result struct {
 	Meaning     string
 	Example     string
 	Contributor string
+	Autolinks   []string
 }
 
 func Scrape(word string, max int) ([]Result, error) {
@@ -24,29 +25,22 @@ func Scrape(word string, max int) ([]Result, error) {
 		globalErr = err
 	})
 
-	matchedWords := make([]string, 0)
-	meanings := make([]string, 0)
-	examples := make([]string, 0)
-	contributors := make([]string, 0)
+	results := make([]Result, 0)
 
-	c.OnHTML("a.word.text-denim.font-bold", func(h *colly.HTMLElement) {
-		matchedWords = append(matchedWords, h.Text)
-	})
-
-	c.OnHTML("div.break-words.meaning.mb-4", func(h *colly.HTMLElement) {
-		meanings = append(meanings, h.Text)
-	})
-
-	c.OnHTML("div.break-words.example.italic.mb-4", func(h *colly.HTMLElement) {
-		examples = append(examples, h.Text)
-	})
-
-	c.OnHTML("div.contributor.font-bold", func(h *colly.HTMLElement) {
-		contributors = append(contributors, h.Text)
+	c.OnHTML("div.definition", func(h *colly.HTMLElement) {
+		r := Result{
+			ID:          len(results) + 1,
+			Word:        h.ChildText("a.word"),
+			Meaning:     h.ChildText("div.meaning"),
+			Example:     h.ChildText("div.example"),
+			Contributor: formatUsernameAndDate(h.ChildText("div.contributor")),
+			Autolinks:   h.ChildTexts("a.autolink"),
+		}
+		results = append(results, r)
 	})
 
 	c.OnHTML("a[aria-label='Next page']", func(h *colly.HTMLElement) {
-		h.Request.Visit(h.Attr("href"))
+		_ = h.Request.Visit(h.Attr("href"))
 	})
 
 	// for i := 1; i <= (max-1)/7+1; i++ {
@@ -62,17 +56,6 @@ func Scrape(word string, max int) ([]Result, error) {
 
 	if globalErr != nil {
 		return nil, fmt.Errorf("something went wrong: %w", globalErr)
-	}
-
-	results := make([]Result, 0)
-	for i := 0; i < len(meanings); i++ {
-		results = append(results, Result{
-			ID:          i + 1,
-			Word:        strings.TrimSpace(matchedWords[i]),
-			Meaning:     strings.TrimSpace(meanings[i]),
-			Example:     strings.TrimSpace(examples[i]),
-			Contributor: formatUsenameAndDate(contributors[i]),
-		})
 	}
 
 	return results, nil

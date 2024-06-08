@@ -1,19 +1,25 @@
 package lib
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
-func formatUsenameAndDate(input string) string {
+func formatUsernameAndDate(input string) string {
 	// Split the input string to extract the date part
 	parts := strings.Split(input, " ")
 	dateStart := findDateStartIndex(parts)
-	username := strings.TrimSpace(strings.Join(parts[:dateStart], " "))
+	username := color.BlueString(
+		strings.TrimSpace(
+			strings.TrimPrefix(strings.Join(parts[:dateStart], " "), "by "),
+		),
+	)
 	date := strings.Join(parts[dateStart:], " ")
 
 	// Format the output string
-	formattedOutput := fmt.Sprintf("%s (%s)", username, date)
+	formattedOutput := color.New(color.Reset, color.Bold).
+		Sprintf("by %s (%s)", username, color.New(color.Bold).Sprint(date))
 
 	return formattedOutput
 }

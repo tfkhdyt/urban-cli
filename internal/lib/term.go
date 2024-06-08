@@ -3,9 +3,11 @@ package lib
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"slices"
 
-	"github.com/mitchellh/go-wordwrap"
+	"github.com/fatih/color"
+	"github.com/muesli/reflow/wordwrap"
 	"golang.org/x/term"
 )
 
@@ -14,21 +16,63 @@ func PrintResult(result []Result, reverse bool) {
 		slices.Reverse(result)
 	}
 
-	for _, r := range result {
+	for idx, r := range result {
+		highlight := color.New(color.FgBlue, color.Bold, color.Underline).
+			SprintFunc()
+
+		for _, word := range r.Autolinks {
+			regex := regexp.MustCompile(`\b` + regexp.QuoteMeta(word) + `\b`)
+			r.Meaning = regex.ReplaceAllStringFunc(
+				r.Meaning,
+				func(matched string) string {
+					return highlight(matched)
+				},
+			)
+
+			r.Example = regex.ReplaceAllStringFunc(
+				r.Example,
+				func(matched string) string {
+					return highlight(matched)
+				},
+			)
+		}
+
 		number := fmt.Sprintf("#%d", r.ID)
 
-		fmt.Println(
+		// header
+		color.New(color.Bold).Println(
 			number,
-			r.Word,
+			color.BlueString(r.Word),
 			getHorizontalLine(
-				getTermSize()-len(r.Contributor)-len(r.Word)-len(number)-3,
+				getTermSize()-len(r.Contributor)-len(r.Word)-len(number)+28,
 			),
 			r.Contributor,
 		)
-		fmt.Println(wordwrap.WrapString(fmt.Sprintf("%s\n", r.Meaning), uint(getTermSize())))
-		fmt.Println(wordwrap.WrapString(fmt.Sprintf("%s\n", r.Example), uint(getTermSize())))
+
+		// content
+		fmt.Println(
+			wordwrap.String(
+				fmt.Sprintf("%s\n", r.Meaning),
+				getTermSize(),
+			),
+		)
+
+		if idx == len(result)-1 {
+			fmt.Println(
+				wordwrap.String(
+					color.New(color.Italic).Sprintf("%s", r.Example),
+					getTermSize(),
+				),
+			)
+		} else {
+			fmt.Println(
+				wordwrap.String(
+					color.New(color.Italic).Sprintf("%s\n", r.Example),
+					getTermSize(),
+				),
+			)
+		}
 	}
-	fmt.Println(getHorizontalLine(getTermSize()))
 }
 
 func getTermSize() int {
