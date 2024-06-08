@@ -67,7 +67,7 @@ func PrintResult(result []Result, reverse bool) {
 		} else {
 			fmt.Println(
 				wordwrap.String(
-					color.New(color.Italic).Sprintf("%s\n", r.Example),
+					color.New(color.Italic).Sprintf("%s\n\n\n", r.Example),
 					getTermSize(),
 				),
 			)
