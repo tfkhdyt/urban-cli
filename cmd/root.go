@@ -25,8 +25,10 @@ import (
 	"github.com/tfkhdyt/urban-cli/internal/lib"
 )
 
-// var maxResults int
-var reverse bool
+var (
+	maxResults int
+	reverse    bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,13 +42,13 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		keyword := args[0]
 
-		result, err := lib.Scrape(keyword)
+		result, err := lib.Scrape(keyword, maxResults)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
 
-		lib.PrintResult(result, reverse)
+		lib.PrintResult(result[:maxResults], reverse)
 	},
 }
 
@@ -70,8 +72,8 @@ func init() {
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	// rootCmd.Flags().
-	// 	IntVarP(&maxResults, "max", "m", 7, "Maximum number of results to show")
+	rootCmd.Flags().
+		IntVarP(&maxResults, "max", "m", 7, "maximum number of results to show")
 
 	rootCmd.Flags().BoolVarP(&reverse, "reverse", "r", false, "reverse results")
 }

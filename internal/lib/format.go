@@ -7,7 +7,7 @@ import (
 
 func formatUsenameAndDate(input string) string {
 	// Split the input string to extract the date part
-	parts := strings.SplitN(input, " ", -1)
+	parts := strings.Split(input, " ")
 	dateStart := findDateStartIndex(parts)
 	username := strings.TrimSpace(strings.Join(parts[:dateStart], " "))
 	date := strings.Join(parts[dateStart:], " ")

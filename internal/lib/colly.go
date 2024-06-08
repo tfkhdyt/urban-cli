@@ -15,8 +15,9 @@ type Result struct {
 	Contributor string
 }
 
-func Scrape(word string) ([]Result, error) {
+func Scrape(word string, max int) ([]Result, error) {
 	c := colly.NewCollector()
+	c.MaxDepth = (max-1)/7 + 1
 
 	var globalErr error
 	c.OnError(func(r *colly.Response, err error) {
@@ -44,6 +45,10 @@ func Scrape(word string) ([]Result, error) {
 		contributors = append(contributors, h.Text)
 	})
 
+	c.OnHTML("a[aria-label='Next page']", func(h *colly.HTMLElement) {
+		h.Request.Visit(h.Attr("href"))
+	})
+
 	// for i := 1; i <= (max-1)/7+1; i++ {
 	url := fmt.Sprintf(
 		"https://www.urbandictionary.com/define.php?term=%s",
@@ -57,17 +62,6 @@ func Scrape(word string) ([]Result, error) {
 
 	if globalErr != nil {
 		return nil, fmt.Errorf("something went wrong: %w", globalErr)
-	}
-
-	if len(matchedWords) != len(meanings) || len(meanings) != len(examples) ||
-		len(examples) != len(contributors) {
-		return nil, fmt.Errorf(
-			"scraped data length mismatch: words=%d, meanings=%d, examples=%d, contributors=%d",
-			len(matchedWords),
-			len(meanings),
-			len(examples),
-			len(contributors),
-		)
 	}
 
 	results := make([]Result, 0)
