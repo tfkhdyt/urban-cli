@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/fatih/color"
+	"github.com/muesli/reflow/indent"
 	"github.com/muesli/reflow/wordwrap"
 	"golang.org/x/term"
 )
@@ -42,7 +43,7 @@ func PrintResult(result []Result, reverse bool) {
 		// header
 		color.New(color.Bold).Println(
 			number,
-			color.BlueString(r.Word),
+			color.GreenString(r.Word),
 			getHorizontalLine(
 				getTermSize()-len(r.Contributor)-len(r.Word)-len(number)+28,
 			),
@@ -57,20 +58,12 @@ func PrintResult(result []Result, reverse bool) {
 			),
 		)
 
-		if idx == len(result)-1 {
-			fmt.Println(
-				wordwrap.String(
-					color.New(color.Italic).Sprintf("%s", r.Example),
-					getTermSize(),
-				),
-			)
-		} else {
-			fmt.Println(
-				wordwrap.String(
-					color.New(color.Italic).Sprintf("%s\n\n\n", r.Example),
-					getTermSize(),
-				),
-			)
+		fmt.Println("Example:")
+		fmt.Println(
+			indent.String(wordwrap.String(r.Example, getTermSize()-4), 4),
+		)
+		if idx != len(result)-1 {
+			fmt.Printf("\n\n\n")
 		}
 	}
 }

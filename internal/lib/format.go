@@ -10,7 +10,7 @@ func formatUsernameAndDate(input string) string {
 	// Split the input string to extract the date part
 	parts := strings.Split(input, " ")
 	dateStart := findDateStartIndex(parts)
-	username := color.BlueString(
+	username := color.GreenString(
 		strings.TrimSpace(
 			strings.TrimPrefix(strings.Join(parts[:dateStart], " "), "by "),
 		),
