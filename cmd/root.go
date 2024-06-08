@@ -35,7 +35,7 @@ var rootCmd = &cobra.Command{
 	Use:     "urban-cli [keyword]",
 	Short:   "Blazingly fast command line interface for Urban Dictionary",
 	Long:    "Blazingly fast command line interface for Urban Dictionary",
-	Version: "0.0.1",
+	Version: "0.1.0",
 	Args:    cobra.ExactArgs(1),
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
