@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/muesli/reflow/wordwrap"
@@ -32,7 +33,7 @@ func PrintResult(result []Result, reverse bool) {
 			r.Example = regex.ReplaceAllStringFunc(
 				r.Example,
 				func(matched string) string {
-					return highlight(matched)
+					return highlight(matched) + "\033[3m"
 				},
 			)
 		}
@@ -57,11 +58,16 @@ func PrintResult(result []Result, reverse bool) {
 			),
 		)
 
+		var formattedExample string
+		for _, e := range strings.Split(r.Example, " ") {
+			formattedExample += color.New(color.Italic).Sprint(e) + " "
+		}
+
 		if r.Example != "" {
 			fmt.Printf("\n")
 			fmt.Println(
 				wordwrap.String(
-					r.Example,
+					formattedExample,
 					getTermSize(),
 				),
 			)
