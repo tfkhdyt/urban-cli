@@ -29,24 +29,22 @@ func Scrape(word string, max int) ([]Result, error) {
 	results := make([]Result, 0)
 
 	c.OnHTML("div.definition", func(h *colly.HTMLElement) {
-		exampleStr, err := h.DOM.Find("div.example").Html()
+		meaning, err := parseContent(h, "div.meaning")
 		if err != nil {
-			globalErr = fmt.Errorf("failed to get example: %w", err)
+			globalErr = err
 			return
 		}
-		example := strings.ReplaceAll(exampleStr, "<br/><br/>", "\n")
 
-		doc, err := goquery.NewDocumentFromReader(strings.NewReader(example))
+		example, err := parseContent(h, "div.example")
 		if err != nil {
-			globalErr = fmt.Errorf("failed to parse example: %w", err)
+			globalErr = err
 			return
 		}
-		example = doc.Text()
 
 		r := Result{
 			ID:          len(results) + 1,
 			Word:        h.ChildText("a.word"),
-			Meaning:     h.ChildText("div.meaning"),
+			Meaning:     meaning,
 			Example:     example,
 			Contributor: formatUsernameAndDate(h.ChildText("div.contributor")),
 			Autolinks:   h.ChildTexts("a.autolink"),
@@ -64,7 +62,7 @@ func Scrape(word string, max int) ([]Result, error) {
 	)
 
 	if err := c.Visit(url); err != nil {
-		return nil, fmt.Errorf("failed to visit urban dictionary: %w", err)
+		return nil, err
 	}
 
 	if globalErr != nil {
@@ -72,4 +70,18 @@ func Scrape(word string, max int) ([]Result, error) {
 	}
 
 	return results, nil
+}
+
+func parseContent(h *colly.HTMLElement, selector string) (string, error) {
+	str, err := h.DOM.Find(selector).Html()
+	if err != nil {
+		return "", fmt.Errorf("failed to get selector: %w", err)
+	}
+	raw := strings.ReplaceAll(str, "<br/><br/>", "\n")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(raw))
+	if err != nil {
+		return "", fmt.Errorf("failed to parse document: %w", err)
+	}
+
+	return doc.Text(), nil
 }
