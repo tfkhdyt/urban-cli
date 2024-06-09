@@ -54,7 +54,7 @@ func PrintResult(result []Result, reverse bool) {
 		fmt.Println(
 			wordwrap.String(
 				r.Meaning,
-				getTermSize(),
+				getTermSize()-2,
 			),
 		)
 
@@ -68,7 +68,7 @@ func PrintResult(result []Result, reverse bool) {
 			fmt.Println(
 				wordwrap.String(
 					formattedExample,
-					getTermSize(),
+					getTermSize()-2,
 				),
 			)
 		}
