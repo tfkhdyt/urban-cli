@@ -16,4 +16,7 @@ imports:
 check-deps:
 	@go list -u -m -json all | go-mod-outdated -update -direct
 
-.PHONY: build lint format lines imports
+changelog:
+	git cliff --bump --unreleased
+
+.PHONY: build lint format lines imports check-deps changelog
