@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -28,11 +29,25 @@ func Scrape(word string, max int) ([]Result, error) {
 	results := make([]Result, 0)
 
 	c.OnHTML("div.definition", func(h *colly.HTMLElement) {
+		exampleStr, err := h.DOM.Find("div.example").Html()
+		if err != nil {
+			globalErr = fmt.Errorf("failed to get example: %w", err)
+			return
+		}
+		example := strings.ReplaceAll(exampleStr, "<br/><br/>", "\n")
+
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(example))
+		if err != nil {
+			globalErr = fmt.Errorf("failed to parse example: %w", err)
+			return
+		}
+		example = doc.Text()
+
 		r := Result{
 			ID:          len(results) + 1,
 			Word:        h.ChildText("a.word"),
 			Meaning:     h.ChildText("div.meaning"),
-			Example:     h.ChildText("div.example"),
+			Example:     example,
 			Contributor: formatUsernameAndDate(h.ChildText("div.contributor")),
 			Autolinks:   h.ChildTexts("a.autolink"),
 		}
@@ -43,16 +58,14 @@ func Scrape(word string, max int) ([]Result, error) {
 		_ = h.Request.Visit(h.Attr("href"))
 	})
 
-	// for i := 1; i <= (max-1)/7+1; i++ {
 	url := fmt.Sprintf(
 		"https://www.urbandictionary.com/define.php?term=%s",
 		strings.ReplaceAll(word, " ", "+"),
 	)
 
 	if err := c.Visit(url); err != nil {
-		return nil, fmt.Errorf("something went wrong: %w", err)
+		return nil, fmt.Errorf("failed to visit urban dictionary: %w", err)
 	}
-	// }
 
 	if globalErr != nil {
 		return nil, fmt.Errorf("something went wrong: %w", globalErr)
