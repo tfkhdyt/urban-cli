@@ -48,7 +48,12 @@ var rootCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		lib.PrintResult(result[:maxResults], reverse)
+		num := maxResults
+		if num > len(result) {
+			num = len(result)
+		}
+
+		lib.PrintResult(result[:num], reverse)
 	},
 }
 
