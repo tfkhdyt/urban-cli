@@ -1,6 +1,6 @@
 module github.com/tfkhdyt/urban-cli
 
-go 1.22.4
+go 1.22.3
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.2
